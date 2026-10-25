@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi Música</title>
+<style>
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0}
+:root{--hd:#008069;--bg:#efeae2;--p:#fff;--tx:#111b21;--sc:#667781;--ac:#00a884;--me:#d9fdd3;--ln:#e9edef;--ot:#fff;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--hd:#202c33;--bg:#0b141a;--p:#111b21;--tx:#e9edef;--sc:#8696a0;--me:#005c4b;--ln:#222d34;--ot:#202c33}}
+html,body{height:100%;overflow:hidden}
+body{font:16px/1.4 system-ui,-apple-system,sans-serif;background:var(--p);color:var(--tx)}
+button,input{font:inherit}button{cursor:pointer}
+input{width:100%;padding:12px;border:1px solid var(--ln);border-radius:10px;background:var(--p);color:var(--tx)}
+small{color:var(--sc)}
+.scr{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--p);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#app{background:var(--bg)}
+header{background:var(--hd);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none}
+header b{flex:1;font-size:18px}
+header button{background:none;border:0;color:#fff;font-size:20px}
+header .pill{background:#ffffff33;border-radius:20px;padding:6px 12px;font-size:14px;color:#fff;border:0}
+.btn,.btn2{border:0;border-radius:10px;padding:12px 16px;font-weight:600}
+.btn{background:var(--ac);color:#fff}.btn2{background:var(--ln);color:var(--tx)}
+.scroll{flex:1;overflow:auto}
+.pad{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:auto;flex:1}
+.fm{display:flex;flex-direction:column;gap:12px}
+.tabs{display:flex}
+.tabs button{flex:1;padding:10px;background:none;border:0;border-bottom:3px solid var(--ln);color:var(--sc);font-weight:600}
+.tabs .on{color:var(--ac);border-color:var(--ac)}
+.li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--ln);cursor:pointer;background:var(--p)}
+.li div{min-width:0;flex:1}
+.li small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av{width:46px;height:46px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;object-fit:cover;flex:none;font-size:18px}
+.av.big{width:120px;height:120px;font-size:48px}
+.em{padding:32px 20px;text-align:center;color:var(--sc)}
+.pf{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 20px;text-align:center}
+.pf code{font-size:18px;background:var(--bg);padding:8px 12px;border-radius:8px}
+.card{display:flex;flex-direction:column;align-items:center;gap:8px}
+nav{display:flex;border-top:1px solid var(--ln);flex:none;background:var(--p)}
+nav button{flex:1;padding:12px;background:none;border:0;color:var(--sc);font-weight:600}
+nav .on{color:var(--ac)}
+.hd{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.hd small{display:block;color:#fffc;font-size:12px}
+.msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.m{max-width:80%;padding:6px 9px;border-radius:10px;background:var(--ot);align-self:flex-start;white-space:pre-wrap;word-break:break-word}
+.m.me{background:var(--me);align-self:flex-end}
+.m img,.m video{display:block;max-width:100%;border-radius:8px}
+.tm{float:right;margin:6px 0 0 10px;font-size:11px;color:var(--sc);white-space:nowrap}
+.tk{font-style:normal;letter-spacing:-3px}.tk.bl{color:#53bdeb}
+.bar{display:flex;align-items:center;gap:8px;padding:8px;background:var(--p);flex:none}
+.bar input{flex:1;border-radius:20px}
+.clip{font-size:22px;cursor:pointer}
+.send{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--ac);color:#fff;font-size:18px}
+#music header{justify-content:center}
+#up{margin:12px 16px;text-align:center;cursor:pointer;display:block}
+#pl{list-style:none;flex:1;overflow:auto}
+#pl li{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--ln);cursor:pointer}
+#pl li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pl li.on{color:var(--ac);font-weight:700}
+#pl li.em{justify-content:center;color:var(--sc);cursor:default}
+#pl li button{background:none;border:0;color:var(--sc)}
+#pb{padding:10px 16px;border-top:1px solid var(--ln);display:flex;flex-direction:column;gap:6px;flex:none}
+#now{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sk{width:100%;accent-color:var(--ac)}
+.ctl{display:flex;justify-content:space-between;align-items:center}
+.ctl button{background:none;border:0;font-size:26px;color:var(--tx)}
+#rp{font-size:13px!important;color:var(--sc)!important}
+#rs{background:none;border:0;color:#d93025;padding:12px;text-decoration:underline;flex:none}
+#hid{position:fixed;top:0;right:0;width:60px;height:60px;opacity:0;z-index:12;border:0;background:none}
+#modal{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:20px;z-index:99}
+.box{background:var(--p);color:var(--tx);border-radius:14px;padding:20px;width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px}
+.box h3{font-size:17px}
+.row{display:flex;gap:8px;justify-content:flex-end}
+.row button{border:0;border-radius:10px;padding:10px 16px;font-weight:600}
+.row .btn{background:var(--ac);color:#fff}.row .btn2{background:var(--ln);color:var(--tx)}
+</style>
+</head>
+<body>
+
+<div id="music" class="scr">
+  <header><b>🎵 Mi Música</b></header>
+  <button id="hid" aria-hidden="true" tabindex="-1"></button>
+  <label id="up" class="btn">＋ Subir música<input id="upf" type="file" accept="audio/*" multiple hidden></label>
+  <ul id="pl"></ul>
+  <div id="pb">
+    <div id="now">Nada reproduciéndose</div>
+    <input id="sk" type="range" min="0" max="1000" value="0">
+    <div class="ctl"><button id="pv">⏮️</button><button id="pp">▶️</button><button id="nx">⏭️</button><button id="rp">➡️ Seguir</button></div>
+  </div>
+  <button id="rs">Reiniciar aplicación</button>
+</div>
+
+<div id="app" class="scr" hidden></div>
+<div id="modal" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('');
+
+/* ---------- Ventanas emergentes ---------- */
+const M = $('#modal');
+function ask(html, fields = [], btns = ['OK']) {
+  return new Promise(res => {
+    M.innerHTML = `<div class="box">${html}${fields.map((f, i) => `<input id="q${i}" type="${f[1] || 'text'}" placeholder="${esc(f[0])}" ${f[2] || ''} autocomplete="off">`).join('')}<div class="row">${btns.map((b, i) => `<button class="${i == 0 ? 'btn' : 'btn2'}" data-i="${i}">${esc(b)}</button>`).join('')}</div></div>`;
+    M.hidden = false;
+    M.onclick = e => {
+      const k = e.target.closest('[data-i]');
+      if (!k) return;
+      M.hidden = true;
+      res({ i: +k.dataset.i, v: fields.map((_, i) => $('#q' + i).value) });
+    };
+  });
+}
+const msg = t => ask(`<p>${esc(t)}</p>`, [], ['OK']);
+
+/* ---------- MÚSICA (guardada en el dispositivo) ---------- */
+const DB = new Promise((ok, no) => {
+  const q = indexedDB.open('mm', 1);
+  q.onupgradeneeded = () => q.result.createObjectStore('s', { keyPath: 'id', autoIncrement: true });
+  q.onsuccess = () => ok(q.result);
+  q.onerror = () => no(q.error);
+});
+async function dbq(mode, fn) {
+  const db = await DB;
+  return new Promise((ok, no) => {
+    const t = db.transaction('s', mode), r = fn(t.objectStore('s'));
+    t.oncomplete = () => ok(r.result);
+    t.onerror = () => no(t.error);
+  });
+}
+const au = new Audio();
+let L = [], cur = null, mode = 0, url = '';
+const MODES = ['➡️ Seguir', '🔁 Repetir lista', '🔂 Repetir una'];
+async function lib() { L = await dbq('readonly', o => o.getAll()); drawList(); }
+function drawList() {
+  $('#pl').innerHTML = L.length
+    ? L.map(s => `<li class="${cur === s.id ? 'on' : ''}" data-id="${s.id}"><span>${esc(s.n.replace(/\.\w+$/, ''))}</span><button data-del="${s.id}">✕</button></li>`).join('')
+    : '<li class="em">Sube tu música con el botón de arriba</li>';
+}
+function play(i) {
+  const s = L[i]; if (!s) return;
+  cur = s.id;
+  URL.revokeObjectURL(url);
+  url = URL.createObjectURL(s.b);
+  au.src = url; au.play();
+  $('#now').textContent = s.n.replace(/\.\w+$/, '');
+  drawList();
+}
+function step(d) {
+  if (!L.length) return;
+  const i = L.findIndex(s => s.id === cur);
+  play(i < 0 ? 0 : (i + d + L.length) % L.length);
+}
+au.onended = () => {
+  if (mode == 2) { au.currentTime = 0; au.play(); return; }
+  const i = L.findIndex(s => s.id === cur);
+  if (i < L.length - 1) play(i + 1);
+  else if (mode == 1) play(0);
+};
+au.onplay = au.onpause = () => $('#pp').textContent = au.paused ? '▶️' : '⏸️';
+au.ontimeupdate = () => { if (au.duration) $('#sk').value = au.currentTime / au.duration * 1000; };
+$('#sk').oninput = e => { if (au.duration) au.currentTime = au.duration * e.target.value / 1000; };
+$('#pp').onclick = () => { if (!L.length) return; if (cur == null) play(0); else au.paused ? au.play() : au.pause(); };
+$('#pv').onclick = () => step(-1);
+$('#nx').onclick = () => step(1);
+$('#rp').onclick = e => { mode = (mode + 1) % 3; e.target.textContent = MODES[mode]; };
+$('#upf').onchange = async e => {
+  for (const f of e.target.files) await dbq('readwrite', o => o.add({ n: f.name, b: f }));
+  e.target.value = '';
+  lib();
+};
+$('#pl').onclick = async e => {
+  const d = e.target.closest('[data-del]');
+  if (d) {
+    const id = +d.dataset.del;
+    await dbq('readwrite', o => o.delete(id));
+    if (id === cur) { au.pause(); cur = null; $('#now').textContent = 'Nada reproduciéndose'; }
+    return lib();
+  }
+  const li = e.target.closest('li[data-id]');
+  if (li) play(L.findIndex(s => s.id === +li.dataset.id));
+};
+lib();
+
+/* ---------- BOTÓN INVISIBLE Y CÓDIGO ---------- */
+$('#hid').onclick = async () => {
+  const saved = localStorage.getItem('cod');
+  if (!saved) {
+    const a = await ask('<h3>Crea tu código de acceso</h3>', [['Código', 'password']], ['Continuar', 'Cancelar']);
+    if (a.i || !a.v[0]) return;
+    const b = await ask('<h3>Repite el código</h3>', [['Repite el código', 'password']], ['Confirmar', 'Cancelar']);
+    if (b.i) return;
+    if (a.v[0] !== b.v[0]) return msg('Los códigos no coinciden. Inténtalo de nuevo.');
+    const c = await ask('<h3>¿Usted desea añadir este código de acceso a su aplicación?</h3>', [], ['Sí', 'No']);
+    if (c.i) return;
+    localStorage.setItem('cod', await sha(a.v[0]));
+    return msg('Código guardado ✔');
+  }
+  const a = await ask('<h3>Código de acceso</h3>', [['Código', 'password']], ['Entrar', 'Cancelar']);
+  if (a.i) return;
+  (await sha(a.v[0])) === saved ? openSecret() : msg('Código incorrecto');
+};
+$('#rs').onclick = async () => {
+  const r = await ask('<h3>⚠️ Reiniciar aplicación</h3><p>Se borrará TODO lo que tiene la aplicación en este dispositivo: tu música, tu código de acceso y tu sesión. No se puede deshacer.</p>', [], ['Borrar todo', 'Cancelar']);
+  if (r.i) return;
+  localStorage.clear();
+  await dbq('readwrite', o => o.clear());
+  location.reload();
+};
+
+/* ---------- API (Netlify) ---------- */
+async function api(action, data = {}) {
+  const r = await fetch('/.netlify/functions/api', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ action, token: localStorage.getItem('tok') || '', ...data })
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(j.error || 'Error de conexión'); e.status = r.status; throw e; }
+  return j;
+}
+
+/* ---------- ÁREA SECRETA: CUENTA Y CHAT ---------- */
+const app = $('#app');
+let me = null, tab = 'c', chat = null, timers = [], hb = null;
+const stopT = () => { timers.forEach(clearInterval); timers = []; };
+const startHB = () => { clearInterval(hb); hb = setInterval(() => api('me').catch(() => {}), 30000); };
+const av = (p, c = '') => p.photo
+  ? `<img class="av ${c}" src="${p.photo}" alt="">`
+  : `<div class="av ${c}">${esc((p.name || '?')[0].toUpperCase())}</div>`;
+const shrink = (f, max, q = .7) => new Promise((ok, no) => {
+  const u = URL.createObjectURL(f), i = new Image();
+  i.onload = () => {
+    const s = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement('canvas');
+    c.width = i.width * s; c.height = i.height * s;
+    c.getContext('2d').drawImage(i, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(u);
+    ok(c.toDataURL('image/jpeg', q));
+  };
+  i.onerror = () => no(new Error('No se pudo leer la imagen'));
+  i.src = u;
+});
+const toData = f => new Promise((ok, no) => {
+  const r = new FileReader();
+  r.onload = () => ok(r.result);
+  r.onerror = no;
+  r.readAsDataURL(f);
+});
+
+function openSecret() {
+  app.hidden = false;
+  localStorage.getItem('tok') ? boot() : authScreen();
+}
+async function boot() {
+  try {
+    me = (await api('me')).me;
+    startHB(); home();
+  } catch (e) {
+    if (e.status === 401) localStorage.removeItem('tok');
+    authScreen();
+  }
+}
+function afterAuth(r) {
+  localStorage.setItem('tok', r.token);
+  me = r.me;
+  startHB(); home();
+}
+
+function authScreen() {
+  stopT(); chat = null;
+  app.innerHTML = `<header><button data-go="close">←</button><b>Acceso</b></header>
+  <div class="pad">
+    <div class="tabs"><button class="on" data-tab="0">Iniciar sesión</button><button data-tab="1">Crear cuenta</button></div>
+    <div id="f0" class="fm">
+      <input id="le" type="email" placeholder="Correo electrónico" autocomplete="email">
+      <input id="lp" type="password" placeholder="Código de acceso">
+      <button class="btn" data-go="login">Iniciar sesión</button>
+    </div>
+    <div id="f1" class="fm" hidden>
+      <input id="sn" type="tel" maxlength="24" placeholder="Número de acceso al chat (15 dígitos)">
+      <small>Puedes poner cualquier número de 15 dígitos. Ese número te sirve para hablar con otras personas.</small>
+      <input id="sm" maxlength="40" placeholder="Nombre que aparecerá en el chat">
+      <input id="sp" type="password" placeholder="Código de acceso (mínimo 6)">
+      <input id="sq" type="password" placeholder="Repite el código">
+      <input id="se" type="email" placeholder="Correo electrónico">
+      <button class="btn" data-go="signup">Crear cuenta</button>
+    </div>
+  </div>`;
+}
+
+function home() {
+  stopT(); chat = null;
+  app.innerHTML = `<header><b>${tab == 'c' ? 'Mensajes' : 'Perfil'}</b>${tab == 'c' ? '<button class="pill" data-go="add">＋ Añadir chat</button>' : ''}</header>
+  <div id="body" class="scroll"></div>
+  <nav>
+    <button data-go="tabc" class="${tab == 'c' ? 'on' : ''}">💬 Mensajes</button>
+    <button data-go="tabp" class="${tab == 'p' ? 'on' : ''}">👤 Perfil</button>
+  </nav>`;
+  if (tab == 'c') { loadChats(); timers.push(setInterval(loadChats, 5000)); }
+  else drawProfile();
+}
+
+async function loadChats() {
+  if (!$('#body')) return;
+  try {
+    const r = await api('chats');
+    if (!$('#body')) return;
+    $('#body').innerHTML = r.chats.length
+      ? r.chats.map(c => `<div class="li" data-open="${esc(c.peer)}">${av(c.profile)}<div><b>${esc(c.profile.name)}</b><small>${esc(c.last || 'Toca para escribir')}</small></div></div>`).join('')
+      : '<p class="em">Aún no tienes chats.<br>Toca “＋ Añadir chat” y escribe el número de tu amigo.</p>';
+  } catch (e) {}
+}
+
+function drawProfile() {
+  $('#body').innerHTML = `<div class="pf">
+    <label style="cursor:pointer">${av(me, 'big')}<input id="ph" type="file" accept="image/*" hidden></label>
+    <h2>${esc(me.name)}</h2>
+    <small>Toca la foto para cambiarla</small>
+    <p>Mi número de chat</p>
+    <code>${esc(me.num)}</code>
+    <button class="btn" data-go="share">Compartir código de chat</button>
+    <button class="btn2" data-go="logout">Cerrar sesión</button>
+  </div>`;
+}
+
+async function addChat() {
+  const r = await ask('<h3>Añadir chat</h3>', [['Número de chat de tu contacto (15 dígitos)', 'tel', 'maxlength="24"']], ['Buscar', 'Cancelar']);
+  if (r.i) return;
+  const n = r.v[0].replace(/\D/g, '');
+  if (n.length != 15) return msg('El número debe tener 15 dígitos');
+  let p;
+  try { p = (await api('find', { num: n })).profile; } catch (e) { return msg(e.message); }
+  const c = await ask(`<h3>Este es el contacto que buscabas</h3><div class="card">${av(p)}<b>${esc(p.name)}</b><small>${esc(p.num)}</small></div>`, [], ['Aceptar', 'Cancelar']);
+  if (c.i) return;
+  try { await api('accept', { num: n }); openChat(n); }
+  catch (e) { msg(e.message); }
+}
+
+function openChat(peer) {
+  stopT(); chat = peer;
+  app.innerHTML = `<header><button data-go="back">←</button><div id="hd" class="hd"></div></header>
+  <div id="msgs" class="msgs"></div>
+  <div class="bar">
+    <label class="clip">📎<input id="fl" type="file" accept="image/*,video/*" hidden></label>
+    <input id="tx" placeholder="Escribe un mensaje" autocomplete="off">
+    <button class="send" data-go="send">➤</button>
+  </div>`;
+  timers.push(setInterval(() => loadMsgs(false), 2500));
+  loadMsgs(true);
+}
+
+const row = m => {
+  const mine = m.from == me.num;
+  const t = new Date(m.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const body = m.k == 'i' ? `<img src="${m.x}" alt="">`
+    : m.k == 'v' ? `<video src="${m.x}" controls playsinline></video>`
+    : esc(m.x);
+  const ticks = mine ? `<i class="tk ${m.st >= 3 ? 'bl' : ''}">${m.st >= 2 ? '✓✓' : '✓'}</i>` : '';
+  return `<div class="m ${mine ? 'me' : ''}">${body}<span class="tm">${t} ${ticks}</span></div>`;
+};
+
+async function loadMsgs(force) {
+  const p = chat; if (!p) return;
+  let r;
+  try { r = await api('messages', { peer: p }); } catch (e) { return; }
+  if (chat !== p) return;
+  const el = $('#msgs'), hd = $('#hd');
+  if (!el || !hd) return;
+  hd.innerHTML = `${av(r.peer)}<div><b>${esc(r.peer.name)}</b><small>${r.peer.online ? 'en línea' : 'no está en línea'}</small></div>`;
+  const key = r.msgs.map(m => m.t + ':' + m.st).join(',');
+  if (el.dataset.k === key) return;
+  const near = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+  el.innerHTML = r.msgs.map(row).join('');
+  el.dataset.k = key;
+  if (force || near) el.scrollTop = el.scrollHeight;
+}
+
+async function send(k, x) {
+  await api('send', { to: chat, k, x });
+  loadMsgs(true);
+}
+async function sendText() {
+  const i = $('#tx'); if (!i) return;
+  const x = i.value.trim();
+  if (!x) return;
+  i.value = '';
+  try { await send('t', x); } catch (e) { msg(e.message); }
+}
+
+const ACT = {
+  close() { app.hidden = true; stopT(); clearInterval(hb); },
+  async login() {
+    try { afterAuth(await api('login', { email: $('#le').value, pass: $('#lp').value })); }
+    catch (e) { msg(e.message); }
+  },
+  async signup() {
+    if ($('#sp').value !== $('#sq').value) return msg('Los códigos no coinciden');
+    try {
+      const r = await api('signup', { num: $('#sn').value, name: $('#sm').value, pass: $('#sp').value, email: $('#se').value });
+      tab = 'p';
+      afterAuth(r);
+    } catch (e) { msg(e.message); }
+  },
+  add: addChat,
+  tabc() { tab = 'c'; home(); },
+  tabp() { tab = 'p'; home(); },
+  back() { chat = null; home(); },
+  send: sendText,
+  share() {
+    const t = me.num;
+    if (navigator.share) navigator.share({ text: 'Mi código de chat: ' + t }).catch(() => {});
+    else { navigator.clipboard?.writeText(t); msg('Tu código de chat (copiado): ' + t); }
+  },
+  async logout() {
+    try { await api('logout'); } catch (e) {}
+    localStorage.removeItem('tok');
+    me = null; clearInterval(hb);
+    authScreen();
+  }
+};
+
+app.addEventListener('click', e => {
+  const o = e.target.closest('[data-open]');
+  if (o) return openChat(o.dataset.open);
+  const t = e.target.closest('[data-tab]');
+  if (t) {
+    const i = +t.dataset.tab;
+    $('#f0').hidden = i !== 0; $('#f1').hidden = i !== 1;
+    [...t.parentElement.children].forEach((b, k) => b.className = k === i ? 'on' : '');
+    return;
+  }
+  const g = e.target.closest('[data-go]');
+  if (g && ACT[g.dataset.go]) ACT[g.dataset.go]();
+});
+app.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'tx') sendText(); });
+app.addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  e.target.value = '';
+  try {
+    if (e.target.id === 'ph') {
+      const x = await shrink(f, 256, .8);
+      me = (await api('photo', { photo: x })).me;
+      home();
+    } else if (e.target.id === 'fl') {
+      if (f.type.startsWith('video/')) {
+        if (f.size > 3.5e6) return msg('El video es muy pesado (máximo 3.5 MB)');
+        await send('v', await toData(f));
+      } else {
+        await send('i', await shrink(f, 800, .7));
+      }
+    }
+  } catch (x) { msg(x.message); }
+});
+</script>
+</body>
+</html>
